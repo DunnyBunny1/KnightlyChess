@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents a Chess Model that can only be queried. Read-only chess models can be queried for
@@ -8,14 +9,14 @@ import java.util.Optional;
  */
 public interface ReadOnlyChessModel {
   /**
-   * Gets the piece at the given position in the board, or returns the empty optional if the
+   * Gets the piece type at the given position in the board, or returns the empty optional if the
    * position is unoccupied.
    *
    * @param pair the 0-indexed row and column in the board position
-   * @return an Optional containing either a Piece or nothing.
+   * @return an Optional containing either a Piece type or nothing.
    * @throws IllegalArgumentException if the position is out of bounds
    */
-  Optional<Piece> getPieceAt(RowColPair pair);
+  Optional<PieceType> getPieceTypeAt(RowColPair pair);
 
   /**
    * Returns true if the given move can legally be made on the given board, false otherwise
@@ -47,10 +48,10 @@ public interface ReadOnlyChessModel {
   /**
    * Gets the current turn for the game.
    *
-   * @return the PlayerColor for current turn
+   * @return true if it is white's turn, false if it black's turn.
    * @throws IllegalStateException if the game has not yet started or has already ended.
    **/
-  PlayerColor getTurn();
+  boolean getWhiteToMove();
 
   /**
    * Gets a deep copy of the given model, including the game board and all related game logic.
@@ -67,4 +68,11 @@ public interface ReadOnlyChessModel {
    */
   void addListener(ModelListener listener);
 
+  String getFenString();
+
+  Set<Move> getLegalMoves(PlayerColor c);
+
+  Set<RowColPair> getColorTargetSquares(PlayerColor c);
+
+  Set<RowColPair> getTargetSquares(RowColPair position);
 }
