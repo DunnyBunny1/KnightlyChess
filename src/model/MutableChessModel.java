@@ -11,10 +11,9 @@ public interface MutableChessModel extends ReadOnlyChessModel {
    * Applies the given move to the given model
    *
    * @param m the move to be applied
-   * @throws IllegalStateException    if the move cannot
-   *                                  be made on the given board, due to pins
-   * @throws IllegalArgumentException if the source position
-   *                                  or destination position are not in bounds
+   * @throws IllegalArgumentException    if the move is not a legal move for the current game state.
+   * @throws IllegalStateException if the game is over or has not yet started
+   * @throws IllegalArgumentException if the source position or destination position are null or not in bounds
    */
   void makeMove(Move m) throws IllegalStateException;
 
@@ -22,8 +21,7 @@ public interface MutableChessModel extends ReadOnlyChessModel {
    * Sets the game to the initial position and allow for moves to be
    * made.
    *
-   * @throws IllegalStateException if the game has already been started
-   *                               or the game is over
+   * @throws IllegalStateException if the game has already been started or the game is over
    */
   void startGame();
 
