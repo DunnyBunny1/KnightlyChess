@@ -1,5 +1,6 @@
 package model.Pieces;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,22 +10,24 @@ import java.util.Set;
 import model.Direction;
 import model.Piece;
 import model.PieceType;
+import model.PlayerColor;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public class King extends Piece {
+public final class King extends Piece {
   public King(boolean isWhite) {
     super(isWhite);
   }
-
-  private static final Map<Character, RowColPair> fenCharToCandidateCastlingSquare;
+  //since this is an unmodifiable map and RowColPairs are immutable, this is safe to be made public
+  public static final Map<Character, RowColPair> fenCharToCandidateCastlingSquare;
 
   static {
-    fenCharToCandidateCastlingSquare = new HashMap<>();
-    fenCharToCandidateCastlingSquare.put('K', new RowColPair(7, 6));
-    fenCharToCandidateCastlingSquare.put('Q', new RowColPair(7, 2));
-    fenCharToCandidateCastlingSquare.put('k', new RowColPair(0, 6));
-    fenCharToCandidateCastlingSquare.put('q', new RowColPair(0, 2));
+    //Use map.of() to create an unmodifiable map
+    fenCharToCandidateCastlingSquare = Map.of('K', new RowColPair(7, 6),
+            'Q', new RowColPair(7, 2),
+            'k', new RowColPair(0, 6),
+            'q', new RowColPair(0, 2)
+    );
   }
 
   @Override
@@ -61,16 +64,20 @@ public class King extends Piece {
   }
 
   private Set<RowColPair> getCastlingTargetSquares(RowColPair position, ReadOnlyChessModel model) {
-    //if we are here, we are safe to retrieve the piece and board
     Optional<Piece>[][] board = model.getBoardCopy();
+    //if the king is in check, we cannot castle
+    PlayerColor oppositeColor = this.isWhite ? PlayerColor.BLACK : PlayerColor.WHITE;
+    if (model.getColorTargetSquares(oppositeColor).contains(position)) {
+      return Collections.emptySet();
+    }
     Set<RowColPair> targetSquares = new HashSet<>();
     char[] castlingPrivileges = model.getCastlingPrivileges().toCharArray();
     for (char castlingPrivilege : castlingPrivileges) {
       //if we still have castling privileges for the given privilege...
       if (fenCharToCandidateCastlingSquare.containsKey(castlingPrivilege)) {
         RowColPair candidate = fenCharToCandidateCastlingSquare.get(castlingPrivilege);
-        //if we have castling privilegs and a clear path to castle, we can castle
-        if (hasClearPathToCastle(position, candidate, board)) {
+        //if we have castling privileges and a clear path to castle, we can castle
+        if (hasClearPathToCastle(position, candidate, model)) {
           targetSquares.add(candidate);
         }
       }
@@ -78,7 +85,8 @@ public class King extends Piece {
     return targetSquares;
   }
 
-  private boolean hasClearPathToCastle(RowColPair kingPosition, RowColPair candidate, Optional<Piece>[][] board) {
+  private boolean hasClearPathToCastle(RowColPair kingPosition, RowColPair candidate, ReadOnlyChessModel model) {
+    Optional<Piece>[][] board = model.getBoardCopy();
     //for castling, the rows should be the same and the files should be different
     int difference = kingPosition.getCol() - candidate.getCol();
     if (difference > 0) {//if we are here, we the king file is > the candidate file
@@ -97,6 +105,11 @@ public class King extends Piece {
       for (int file = kingPosition.getCol() + 1; file <= candidate.getCol(); file++) {
         if (board[candidate.getRow()][file].isPresent()) {
           return false; //if we are here, something is in our way
+        }
+        //We cannot castle through check, so ensure that the path is not targeted by enemy
+        PlayerColor oppositeColor = this.isWhite ? PlayerColor.BLACK : PlayerColor.WHITE;
+        if (model.getColorTargetSquares(oppositeColor).contains(candidate)) {
+          return false;
         }
       }
     }

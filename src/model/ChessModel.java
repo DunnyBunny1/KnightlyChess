@@ -26,7 +26,8 @@ public final class ChessModel implements MutableChessModel {
           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
   private static final int HASHING_PRIME_NUMBER = 31; //used for hashCode()
   //the set of all legal promotion pieces, initialized in static block
-  private static final Set<PieceType> pawnPromotionPieceTypes;
+  //Since this is an unmodifiable set and each type is immutable, this is safe to be public
+  public static final Set<PieceType> pawnPromotionPieceTypes;
 
   //fields for a unique chess model instance
   private String fenString; //INVARIANT: fenString is always valid and up to date
@@ -268,7 +269,7 @@ public final class ChessModel implements MutableChessModel {
       gameBoard[destPos.getRow()][destPos.getCol()] = Optional.of(piece);
       gameBoard[sourcePos.getRow()][sourcePos.getCol()] = Optional.empty();
     }
-    updateFenString();
+    updateFenString(m);
     notifyAllListeners(ModelEvent.MOVE_MADE);
   }
 
@@ -276,37 +277,22 @@ public final class ChessModel implements MutableChessModel {
    * If m is a move of a pawn to a promotion square, makes the pawn promotion move.
    *
    * @param m the move to be made, must be a legal move
-   * @return true if the move is made, false if the move is not a pawn to a promotion square
-   * @throws IllegalStateException if the move is a move to a promotion square but there is
-   *                               an error in creating the newly promoted piece
-   * @throws IllegalStateException if the move is not legal
+   * @return true if the move is made, false if the move is not a pawn promotion
+   * @throws IllegalArgumentException if the move is a move to a promotion square but there is
+   *                                  an error in creating the newly promoted piece
+   * @throws IllegalArgumentException if the move is not legal
    */
   private boolean tryPawnPromotion(Move m) {
     if (!canMakeMove(m)) {
-      throw new IllegalStateException("Unable to try pawn promotino move with illegal move");
+      throw new IllegalArgumentException("Unable to try pawn promotino move with illegal move");
     }
-    //If we are here, the move is legal. We are safe to retreive the src, dest, and the piece
-    //This means that the source contains a piece, and the destination tile is an either unoccupied
-    //or contains an enemy piece that legally can be captured.
+//    if (m.getFlag().isEmpty() || m.getFlag().get() != Move.MoveFlag.PAWN_PROMOTION) {
+//      return false;
+//    }
+    //If we are here, we have a legal pawn promotion move
     RowColPair sourcePos = m.getSourcePosition();
     RowColPair destPos = m.getDestinationPosition();
     Piece piece = gameBoard[sourcePos.getRow()][sourcePos.getCol()].get();
-    if (piece.getType() != PieceType.PAWN) { //ensure we are moving a pawn
-      return false;
-    }
-    //ensure the pawn is one rank away from promotion
-    int rankBeforePromotion = piece.getIsWhite() ? 1 : 7;
-    if (sourcePos.getRow() != rankBeforePromotion) {
-      return false;
-    }
-    //if we are here, the pawn is one rank away from promotion.
-    //There must be a valid promotion piece type specified, or else the move is illegal
-    if (m.getPawnPromotionPieceType().isEmpty() || !pawnPromotionPieceTypes.contains(
-            m.getPawnPromotionPieceType().get())) {
-      throw new IllegalStateException("Cannot make pawn promotion move due to invalid or " +
-              "unspecified promotion piece type");
-    }
-
     //create the new promotion piece and put it at the destination tile
     char typeChar = m.getPawnPromotionPieceType().get().getLowercasedPieceID();
     if (piece.getIsWhite()) { //if we are promoting to a white piece, ensure promotion piece is white
@@ -322,9 +308,33 @@ public final class ChessModel implements MutableChessModel {
     gameBoard[sourcePos.getRow()][sourcePos.getCol()] = Optional.empty();
     return true;
   }
-
+  /**
+   * If m is an en-passsant move, makes the en-passant move.
+   *
+   * @param m the move to be made, must be a legal move
+   * @return true if the move is made, false if the move is not an en-passant
+   * @throws IllegalArgumentException if the move is not legal
+   */
   private boolean tryEnPassant(Move m) {
-    return false;
+    if (!canMakeMove(m)) {
+      throw new IllegalArgumentException("Unable to try en passant move with illegal move");
+    }
+//    if (m.getFlag().isEmpty() || m.getFlag().get() != Move.MoveFlag.EN_PASSANT) {
+//      return false;
+//    }
+    //If we are here, we have a legal en-passant move
+    RowColPair sourcePos = m.getSourcePosition();
+    RowColPair destPos = m.getDestinationPosition();
+    Optional<Piece> piece = gameBoard[sourcePos.getRow()][sourcePos.getCol()];
+    //put the source piece at the destination slot
+    gameBoard[destPos.getRow()][destPos.getCol()] = piece;
+
+    //clear the source piece from its source slot
+    gameBoard[sourcePos.getRow()][sourcePos.getCol()] = Optional.empty();
+
+    //remove the en-passant piece that was captured
+
+    return true;
   }
 
   private boolean tryCastle(Move m) {
@@ -352,7 +362,7 @@ public final class ChessModel implements MutableChessModel {
     RowColPair destPos = m.getDestinationPosition();
     Optional<Piece> piece = gameBoard[sourcePos.getRow()][sourcePos.getCol()];
     if (piece.isEmpty()) {
-      throw new IllegalArgumentException("Cannot check move for empty source tile");
+      throw new IllegalArgumentException("Cannot check move for empty source square");
     }
     Set<RowColPair> targetPositions = piece.get().getTargetSquares(sourcePos, this);
     return targetPositions.contains(destPos);
@@ -495,10 +505,10 @@ public final class ChessModel implements MutableChessModel {
   public Optional<Piece>[][] getBoardCopy() {
     //We are sure that this is a type-safe cast, so we can suppress the warning
     Optional<Piece>[][] copy = (Optional<Piece>[][]) new Optional<?>[NUM_RANKS][NUM_FILES];
-    for(int rank = 0; rank < NUM_RANKS; rank++){
-      for(int file = 0; file < NUM_FILES; file++){
+    for (int rank = 0; rank < NUM_RANKS; rank++) {
+      for (int file = 0; file < NUM_FILES; file++) {
         Optional<Piece> piece = gameBoard[rank][file];
-        if(piece.isEmpty()){
+        if (piece.isEmpty()) {
           copy[rank][file] = Optional.empty();
         } else { //Pieces are immutable, so it safe to pass a reference to the same class
           copy[rank][file] = Optional.of(piece.get());
@@ -509,13 +519,14 @@ public final class ChessModel implements MutableChessModel {
   }
 
   private void checkIfPositionIsValid(RowColPair pair) {
-  if (!isInBounds(pair)) {
+    if (!isInBounds(pair)) {
       throw new IllegalArgumentException("Invalid rank or file - rank or file was not in " +
               "between 0 and 8 or row col pair was null");
     }
   }
+
   @Override
-  public boolean isInBounds(RowColPair pair){
+  public boolean isInBounds(RowColPair pair) {
     return pair != null && pair.getRow() >= 0 && pair.getRow() <= NUM_RANKS
             && pair.getCol() >= 0 && pair.getCol() <= NUM_FILES;
   }
@@ -548,10 +559,32 @@ public final class ChessModel implements MutableChessModel {
     return count;
   }
 
-  //updates the FEN (Forsynth-Edwards Notation) String represenation of the board after
-  //the board logic is updated after a move is made
-  //FEN Strings go from top to bottom, left to right
-  private void updateFenString() {
+  /**
+   * Updates the fen string after a move is made by...
+   * <ol>
+   *   <li>
+   *     Updates piece positioning
+   *   </li>
+   *   <li>
+   *     Toggles the side to move
+   *   </li>
+   *   <li>
+   *     Updates castling privileges if a king or rook move is made
+   *   </li>
+   *   <li>
+   *     Sets/clears the en-passant target square based on if the moves was a
+   *     double-tile pawn push
+   *   </li>
+   *   <li>
+   *     Increments half move counter / full move clock
+   *   </li>
+   * </ol>
+   *
+   * @param m the move that was just made
+   */
+  private void updateFenString(Move m) {
+//    updateEnPassantTargetSquare(m);
+//    updateCastlingPrvileges(m);
     StringBuilder fenBuilder = new StringBuilder();
     for (int rank = 0; rank < NUM_RANKS; rank++) {
       int emptyTileCount = 0;

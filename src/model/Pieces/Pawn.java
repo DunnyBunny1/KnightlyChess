@@ -9,7 +9,7 @@ import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public class Pawn extends Piece {
+public final class Pawn extends Piece {
   public Pawn(boolean isWhite) {
     super(isWhite);
   }

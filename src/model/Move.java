@@ -6,7 +6,19 @@ import java.util.Optional;
 public final class Move {
   private final RowColPair src;
   private final RowColPair dest;
+
   private final PieceType pawnPromotionPieceType;
+//  private final MoveFlag flag;
+//  private final RowColPair enPassantCapturedPiece;
+//TODO: Uncomment above ^
+  public enum MoveFlag {
+    PAWN_PROMOTION,
+    DOUBLE_PAWN_PUSH,
+    EN_PASSANT,
+    CASTLE,
+    KING_MOVE,
+    ROOK_MOVE;
+  }
 
   public Move(RowColPair src, RowColPair dest) {
     this.src = src;
@@ -20,6 +32,41 @@ public final class Move {
     this.pawnPromotionPieceType = pawnPromotionPieceType;
   }
 
+  public class Builder {
+    private final RowColPair src;
+    private final RowColPair dest;
+
+    private PieceType pawnPromotionPieceType;
+    private MoveFlag flag;
+    private RowColPair enPassantCapturedPiece;
+
+    public Builder(RowColPair src, RowColPair dest) {
+      this.src = src;
+      this.dest = dest;
+    }
+    public Builder setFlag(MoveFlag flag) {
+      if(flag == null){
+        throw new IllegalArgumentException("Unable to construct move with null move flag");
+      }
+      this.flag = flag;
+      return this;
+    }
+
+    public Builder setPawnPromotionPieceType(PieceType type) {
+      if(type == null || !ChessModel.pawnPromotionPieceTypes.contains(type)){
+        throw new IllegalArgumentException("Unable to construct move for null or illegal" +
+                "pawn promotion piece type");
+      }
+      this.pawnPromotionPieceType = pawnPromotionPieceType;
+      return this;
+    }
+
+    public Builder setEnPassantCapturedPiece(){
+      return null ;
+    }
+
+  }
+
   public RowColPair getSourcePosition() {
     return new RowColPair(src.getRow(), src.getCol());
   }
@@ -31,6 +78,19 @@ public final class Move {
   public Optional<PieceType> getPawnPromotionPieceType() {
     return Optional.ofNullable(pawnPromotionPieceType);
   }
+
+//  public Optional<RowColPair> getEnPassantCapturedPiece() {
+//    return Optional.ofNullable(this.enPassantCapturedPiece);
+//  }
+//
+//  public void setFlag(MoveFlag flag) {
+//    this.flag = flag;
+//  }
+//
+//  public Optional<MoveFlag> getFlag() {
+//    return Optional.ofNullable(this.flag);
+//  }
+
 
   @Override
   public String toString() {

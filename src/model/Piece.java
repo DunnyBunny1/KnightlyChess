@@ -45,7 +45,6 @@ public abstract class Piece {
     return moves;
   }
 
-
   /**
    * Factory method to return the piece type of the given piece implementation
    *

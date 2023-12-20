@@ -6,14 +6,14 @@ import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public class Bishop extends SlidingPiece {
+public final class Bishop extends SlidingPiece {
   public Bishop(boolean isWhite) {
     super(isWhite);
   }
 
   @Override
   public Set<RowColPair> getTargetSquares(RowColPair position, ReadOnlyChessModel model) {
-    return super.getDiagonalTargetSquares(position,model);
+    return super.getDirectionalTargetSquares(position, model, DirectionType.DIAGONAL);
   }
 
   @Override

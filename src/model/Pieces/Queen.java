@@ -7,7 +7,7 @@ import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public class Queen extends SlidingPiece {
+public final class Queen extends SlidingPiece {
   public Queen(boolean isWhite) {
     super(isWhite);
   }
@@ -15,9 +15,9 @@ public class Queen extends SlidingPiece {
   @Override
   public Set<RowColPair> getTargetSquares(RowColPair position, ReadOnlyChessModel model) {
     Set<RowColPair> targetSquares = new HashSet<>();
-    targetSquares.addAll(super.getHorizontalTargetSquares(position, model));
-    targetSquares.addAll(super.getVerticalTargetSquares(position, model));
-    targetSquares.addAll(super.getDiagonalTargetSquares(position, model));
+    targetSquares.addAll(super.getDirectionalTargetSquares(position, model, DirectionType.HORIZONTAL));
+    targetSquares.addAll(super.getDirectionalTargetSquares(position, model, DirectionType.VERTICAL));
+    targetSquares.addAll(super.getDirectionalTargetSquares(position, model, DirectionType.DIAGONAL));
     return targetSquares;
   }
 
