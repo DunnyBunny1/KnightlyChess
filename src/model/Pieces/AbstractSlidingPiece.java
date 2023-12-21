@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import model.ChessModel;
+import model.StrictChessModel;
 import model.Direction;
 import model.Move;
 import model.Piece;
@@ -70,7 +70,7 @@ abstract class AbstractSlidingPiece extends Piece {
     for (Direction direction : validDirections) {
       //n is the target square number in a given direction. The target square can be up to
       //NUM_ranks -1 = 7 squares away from the source square in a given direction
-      for (int n = 0; n < ChessModel.NUM_RANKS - 1; n++) {
+      for (int n = 0; n < StrictChessModel.NUM_RANKS - 1; n++) {
         RowColPair candidate = new RowColPair(position.getRow() + direction.getRankOffset() * (n + 1),
                 position.getCol() + direction.getFileOffset() * (n + 1));
         if (!model.isInBounds(candidate)) { //if we go over the edge of the board, look in a new direction

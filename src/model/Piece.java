@@ -31,32 +31,32 @@ public abstract class Piece {
    * legal target position.
    * @throws IllegalArgumentException if the model or position is invalid
    */
-  protected abstract Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model);
+  public abstract Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model);
 
 
-  /**
-   * Gets the legal moves - all the moves consisting with given source position and destination
-   * position consisting of a destination positions that this piece can move to for the given model.
-   * All of these moves are legal - they can be made and will not put the player executing the move
-   * in check.
-   *
-   * @param position the position in the board that a piece of this type and color is located at
-   * @param model    the chess model to query to calculate moves
-   * @return the Set of legal moves, with move consisting of a source and desintaiton position
-   * @throws IllegalArgumentException if the model or position is invalid
-   */
-  protected final Set<Move> getLegalMoves(RowColPair position, ReadOnlyChessModel model) {
-    checkModelAndPositionValidity(position, model);
-    Set<Move> moves = getPseudoLegalMoves(position, model);
-    PlayerColor friendlyColor = this.isWhite ? PlayerColor.WHITE : PlayerColor.BLACK;
-    moves.removeIf(m -> {
-      MutableChessModel copy = model.getMutableDeepCopy();
-      copy.makeMove(m);
-      Set<RowColPair> enemyTargetSquares = copy.getColorTargetSquares(friendlyColor.getOpposite());
-      return enemyTargetSquares.contains(model.getKingSquare(friendlyColor));
-    });
-    return moves;
-  }
+//  /**
+//   * Gets the legal moves - all the moves consisting with given source position and destination
+//   * position consisting of a destination positions that this piece can move to for the given model.
+//   * All of these moves are legal - they can be made and will not put the player executing the move
+//   * in check.
+//   *
+//   * @param position the position in the board that a piece of this type and color is located at
+//   * @param model    the chess model to query to calculate moves
+//   * @return the Set of legal moves, with move consisting of a source and desintaiton position
+//   * @throws IllegalArgumentException if the model or position is invalid
+//   */
+//  protected final Set<Move> getLegalMoves(RowColPair position, ReadOnlyChessModel model) {
+//    checkModelAndPositionValidity(position, model);
+//    Set<Move> moves = getPseudoLegalMoves(position, model);
+//    PlayerColor friendlyColor = this.isWhite ? PlayerColor.WHITE : PlayerColor.BLACK;
+//    moves.removeIf(m -> {
+//      PermissiveChessModel copy = model.getPermissibleDeepCopy();
+//      copy.makePseudoLegalMove(m);
+//      Set<RowColPair> enemyTargetSquares = copy.getColorTargetSquares(friendlyColor.getOpposite());
+//      return enemyTargetSquares.contains(model.getKingSquare(friendlyColor));
+//    });
+//    return moves;
+//  }
 
   /**
    * Gets the target squares - all the possible destination positions that this piece can move
@@ -75,11 +75,6 @@ public abstract class Piece {
     }
     return targetSquares;
   }
-
-  //INVARIANT: position and destination are valid
-  //Used to help create moves for pieces that have specialty move flags
-  //Defers to piece subclasses to determine their move flag based on the move they are trying to make
-
 
   /**
    * Factory method to return the piece type of the given piece implementation

@@ -24,6 +24,15 @@ public final class Move {
     NONE;
   }
 
+  /**
+   * Constructs a move with the given source and destination positions and the given flag
+   * INVARIANT: flag, src, and dest are never null
+   * @implNote For castling moves, the destination is the position where the king will end up
+   * @param src the source position where the piece making the move is coming from
+   * @param dest the destination position where the source piece making the move will end up
+   * @param flag the flag associated with the move
+   * @throws IllegalArgumentException if src, dest, or flag is null
+   */
   public Move(RowColPair src, RowColPair dest, MoveFlag flag) {
     if (src == null || dest == null || flag == null) {
       throw new IllegalArgumentException("Unable to construct move with null source tile, " +

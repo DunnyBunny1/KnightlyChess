@@ -74,13 +74,22 @@ public interface ReadOnlyChessModel {
   boolean getWhiteToMove();
 
   /**
-   * Gets a mutable deep copy of the given model, including the game board and all related game
-   * logic.
+   * Gets a strict deep copy of the given model, including the game board and all related game
+   * logic. A strict deep copy defines the exact same logic for determining move legality
+   * as the current model implementation.
    *
    * @return a new ChessModel that references a different model with the exact same attributes.
    * This deep copy is also mutable - so it can be mutated by applying moves to it.
    */
-  MutableChessModel getMutableDeepCopy();
+  MutableChessModel getStrictDeepCopy();
+
+  /**
+   * Returns a permissive deep copy of the given model, including the game board and all related game
+   * state logic. A permissive deep copy allows pseudo legal moves to be made on the model.
+   *
+   * @return
+   */
+  PermissiveChessModel getPermissibleDeepCopy();
 
   /**
    * Registers the ModelListener as listener to this model, so that it can be notified whenever the
@@ -93,7 +102,10 @@ public interface ReadOnlyChessModel {
   void addListener(ModelListener listener);
 
   /**
-   * Returns a Set of all the legal moves for the given player color
+   * Returns a Set of all the legal moves for the given player color.
+   * Legal moves are defined by each specific read only chess model implementation.
+   * For example, a permissive chess model may return a set of pseudo-legal moves, while a strict
+   * chess model may return a set of strictly legal moves.
    *
    * @param c the player color for which to get the legal moves from.
    * @return the collection of all the legal moves, as a set.

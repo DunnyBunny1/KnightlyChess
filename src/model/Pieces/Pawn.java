@@ -23,7 +23,7 @@ public final class Pawn extends Piece {
   );
 
   @Override
-  protected Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
+  public Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
     checkModelAndPositionValidity(position, model);
 
     Set<Move> pseudoLegalMoves = new HashSet<>();

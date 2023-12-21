@@ -21,7 +21,7 @@ public interface MutableChessModel extends ReadOnlyChessModel {
    * Sets the game to the initial position and allow for moves to be
    * made.
    *
-   * @throws IllegalStateException if the game has already been started or the game is over
+   * @throws IllegalStateException if the game has already been started
    */
   void startGame();
 

@@ -23,6 +23,13 @@
       - To see if a pseudo-legal move is legal, the move is made and then 
       - Reduced complicated code / surface for bugs 
       - Simple design
+      - I encountered some difficulties with infinite recursion / stack over flow 
+        - When I tried to make a pseudo legal move, I call my model's makeMove()...
+          - makeMove() calls my canMove() function to see if the move is legal
+          - canMove() creates a copy and then calls makeMove() on the copy
+          - the copy's makeMove() calls canMove() on the copy, which creates a new copy
+          - The new copy calls makeMove() on itself, which calls canMove() on the new copy...
+          - This continues until the stack overflow
 ### The Controller 
 
 ### The View
@@ -84,3 +91,11 @@ that bring our king into the fight and closer to the enemy king
 
 # Testing
 ## Engine version improvements 
+
+
+# Making moves 
+- model.makeMove() --calls-> model.canMove() to verify move validity --> creates a copy model 
+makeMove() is called on the copy model --> copy model calls canMove() on itself --> creates a new copy model
+- This continues until the stack overflows
+
+
