@@ -286,15 +286,23 @@ public final class ChessModel implements MutableChessModel {
     if (!canMakeMove(m)) {
       throw new IllegalArgumentException("Unable to try pawn promotino move with illegal move");
     }
-//    if (m.getFlag().isEmpty() || m.getFlag().get() != Move.MoveFlag.PAWN_PROMOTION) {
-//      return false;
-//    }
+    Move.MoveFlag flag = m.getFlag();
+    if (!(Pawn.promotionFlags.contains(flag)) {
+      return false;
+    }
     //If we are here, we have a legal pawn promotion move
     RowColPair sourcePos = m.getSourcePosition();
     RowColPair destPos = m.getDestinationPosition();
     Piece piece = gameBoard[sourcePos.getRow()][sourcePos.getCol()].get();
     //create the new promotion piece and put it at the destination tile
-    char typeChar = m.getFlag().getLowercasedPieceID();
+    PieceType type = switch (flag) {
+      case PAWN_PROMOTION_TO_KNIGHT -> PieceType.KNIGHT;
+      case PAWN_PROMOTION_TO_BISHOP -> PieceType.BISHOP;
+      case PAWN_PROMOTION_TO_ROOK -> PieceType.ROOK;
+      case PAWN_PROMOTION_TO_QUEEN -> PieceType.QUEEN;
+      default -> throw new IllegalStateException("Unknown piece type: " + flag);
+    };
+    char typeChar = type.getLowercasedPieceID();
     if (piece.getIsWhite()) { //if we are promoting to a white piece, ensure promotion piece is white
       typeChar = Character.toUpperCase(typeChar);
     }
@@ -320,9 +328,9 @@ public final class ChessModel implements MutableChessModel {
     if (!canMakeMove(m)) {
       throw new IllegalArgumentException("Unable to try en passant move with illegal move");
     }
-//    if (m.getFlag().isEmpty() || m.getFlag().get() != Move.MoveFlag.EN_PASSANT) {
-//      return false;
-//    }
+    if (m.getFlag() != Move.MoveFlag.EN_PASSANT) {
+      return false;
+    }
     //If we are here, we have a legal en-passant move
     RowColPair sourcePos = m.getSourcePosition();
     RowColPair destPos = m.getDestinationPosition();
@@ -334,12 +342,25 @@ public final class ChessModel implements MutableChessModel {
     gameBoard[sourcePos.getRow()][sourcePos.getCol()] = Optional.empty();
 
     //remove the en-passant piece that was captured
-
+    //we know the captured piece must be the piece at the en passant target square
+    //we know this is safe to retreive, since the move is legal
+    RowColPair enPassantTarget = getEnPassantTarget().get();
+    gameBoard[enPassantTarget.getRow()][enPassantTarget.getCol()] = Optional.empty();
     return true;
   }
 
   private boolean tryCastle(Move m) {
-    return false;
+    if (!canMakeMove(m)) {
+      throw new IllegalArgumentException("Unable to try en passant move with illegal move");
+    }
+    Move.MoveFlag flag = m.getFlag();
+    if (!King.castlingFlags.contains(flag)) {
+      return false;
+    }
+    //If we are here, we have a legal castling move
+    RowColPair sourcePos = m.getSourcePosition();
+    RowColPair destPos = m.getDestinationPosition();
+    Optional<Piece> piece = gameBoard[sourcePos.getRow()][sourcePos.getCol()];
   }
 
   @Override
@@ -638,4 +659,23 @@ public final class ChessModel implements MutableChessModel {
   public String getCastlingPrivileges() {
     return this.castlingRights;
   }
+
+  @Override
+  public Optional<RowColPair> getEnPassantTarget() {
+    return this.enPassantTargetSquare.equals("-") ? Optional.empty() :
+            Optional.of(getRowColPairFromLetterCombination(this.enPassantTargetSquare));
+  }
+
+  public RowColPair getRowColPairFromLetterCombination(String letterCombination) {
+    if (letterCombination.length() != 2) {
+      throw new IllegalArgumentException("Unable to get row col pair from invalid letter combination");
+    }
+    String letters = "abcdefgh";
+    int file = letters.indexOf(letterCombination.charAt(0));
+    int rank = 8 - Character.getNumericValue(letterCombination.charAt(1));
+    RowColPair conversion = new RowColPair(rank, file);
+    checkIfPositionIsValid(conversion);
+    return conversion;
+  }
+
 }

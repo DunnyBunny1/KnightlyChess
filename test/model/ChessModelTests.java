@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
-
 public class ChessModelTests {
   @Test
   public void modelCorrectlyInitializesBoardForStartingPosition() {
@@ -31,9 +30,8 @@ public class ChessModelTests {
     moves.addAll(model.getLegalMoves(PlayerColor.WHITE));
     int numPositions = 0;
     for (Move move : moves) {
-      model.makeMove(move);
-      numPositions += countLegalMoves(model, depth - 1);
-      model.unmakeMove(move);
+      MutableChessModel copy = model.getMutableDeepCopy();
+      numPositions += countLegalMoves(copy, depth - 1);
     }
     return numPositions;
   }

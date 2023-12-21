@@ -1,13 +1,13 @@
 package model.Pieces;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import model.Direction;
+import model.Move;
 import model.Piece;
 import model.PieceType;
 import model.PlayerColor;
@@ -18,8 +18,11 @@ public final class King extends Piece {
   public King(boolean isWhite) {
     super(isWhite);
   }
+
   //since this is an unmodifiable map and RowColPairs are immutable, this is safe to be made public
   public static final Map<Character, RowColPair> fenCharToCandidateCastlingSquare;
+
+  public static final Set<Move.MoveFlag> castlingFlags;
 
   static {
     //Use map.of() to create an unmodifiable map
@@ -28,22 +31,27 @@ public final class King extends Piece {
             'k', new RowColPair(0, 6),
             'q', new RowColPair(0, 2)
     );
+    //Use set.of() to create an unmodifiable set
+    castlingFlags = Set.of(
+            Move.MoveFlag.CASTLE_KINGSIDE,
+            Move.MoveFlag.CASTLE_QUEENSIDE
+    );
   }
 
   @Override
-  public Set<RowColPair> getTargetSquares(RowColPair position, ReadOnlyChessModel model) {
+  protected Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
     checkModelAndPositionValidity(position, model);
-    Set<RowColPair> targetSquares = new HashSet<>();
+    Set<Move> pseudoLegalMoves = new HashSet<>();
     //Kings can both castle and move one slot in each direction
-    targetSquares.addAll(getDirectionalTargetSquares(position, model));
-    targetSquares.addAll(getCastlingTargetSquares(position, model));
-    return targetSquares;
+    pseudoLegalMoves.addAll(getDirectionalPseudoLegalMoves(position, model));
+    pseudoLegalMoves.addAll(getCastlingPseudoLegalMoves(position, model));
+    return pseudoLegalMoves;
   }
 
-  private Set<RowColPair> getDirectionalTargetSquares(RowColPair position, ReadOnlyChessModel model) {
+  private Set<Move> getDirectionalPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
     //if we are here, we are safe to retrieve the piece and board
     Optional<Piece>[][] board = model.getBoardCopy();
-    Set<RowColPair> targetSquares = new HashSet<>();
+    Set<Move> pseudoLegalMoves = new HashSet<>();
     for (Direction direction : Direction.values()) {
       RowColPair candidatePosition = new RowColPair(position.getRow() + direction.getRankOffset()
               , position.getCol() + direction.getFileOffset());
@@ -57,20 +65,23 @@ public final class King extends Piece {
         }
         //if we are here, the destination tile contains an enemy piece that we can capture, or
         //the destination tile is unoccupied. In any case, we can move here.
-        targetSquares.add(candidatePosition);
+        //Denote this move with a king move flag so that the model can know to disallow castling after
+        //the king has moved
+        pseudoLegalMoves.add(new Move(position, candidatePosition, Move.MoveFlag.KING_MOVE));
       }
     }
-    return targetSquares;
+    return pseudoLegalMoves;
   }
 
-  private Set<RowColPair> getCastlingTargetSquares(RowColPair position, ReadOnlyChessModel model) {
+  private Set<Move> getCastlingPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
     Optional<Piece>[][] board = model.getBoardCopy();
+
     //if the king is in check, we cannot castle
     PlayerColor oppositeColor = this.isWhite ? PlayerColor.BLACK : PlayerColor.WHITE;
     if (model.getColorTargetSquares(oppositeColor).contains(position)) {
       return Collections.emptySet();
     }
-    Set<RowColPair> targetSquares = new HashSet<>();
+    Set<Move> pseudoLegalMoves = new HashSet<>();
     char[] castlingPrivileges = model.getCastlingPrivileges().toCharArray();
     for (char castlingPrivilege : castlingPrivileges) {
       //if we still have castling privileges for the given privilege...
@@ -78,11 +89,17 @@ public final class King extends Piece {
         RowColPair candidate = fenCharToCandidateCastlingSquare.get(castlingPrivilege);
         //if we have castling privileges and a clear path to castle, we can castle
         if (hasClearPathToCastle(position, candidate, model)) {
-          targetSquares.add(candidate);
+          //if we are white, kingside castling is indicated by moving to a higher file
+          boolean isKingSideCastle = candidate.getCol() > position.getCol();
+          if (!isWhite) { //if we are black, kingside castling is indicated by moving to a lower file
+            isKingSideCastle = !isKingSideCastle;
+          }
+          Move.MoveFlag flag = isKingSideCastle ? Move.MoveFlag.CASTLE_KINGSIDE : Move.MoveFlag.CASTLE_QUEENSIDE;
+          pseudoLegalMoves.add(new Move(position, candidate, flag));
         }
       }
     }
-    return targetSquares;
+    return pseudoLegalMoves;
   }
 
   private boolean hasClearPathToCastle(RowColPair kingPosition, RowColPair candidate, ReadOnlyChessModel model) {

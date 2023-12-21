@@ -14,9 +14,10 @@ import model.ReadOnlyChessModel;
 import model.RowColPair;
 
 /**
- * sliding
+ * Represents a piece that can only move in a straight lines in any direction, and cannot make
+ * any special moves, such as castling or en passant.
  */
-abstract class SlidingPiece extends Piece {
+abstract class AbstractSlidingPiece extends Piece {
 
   protected enum DirectionType {
     DIAGONAL,
@@ -38,7 +39,7 @@ abstract class SlidingPiece extends Piece {
 
   }
 
-  protected SlidingPiece(boolean isWhite) {
+  protected AbstractSlidingPiece(boolean isWhite) {
     super(isWhite);
   }
 

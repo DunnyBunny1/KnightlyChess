@@ -1,6 +1,5 @@
 package model.Pieces;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import model.Move;
@@ -8,7 +7,7 @@ import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public final class Queen extends SlidingPiece {
+public final class Queen extends AbstractSlidingPiece {
   public Queen(boolean isWhite) {
     super(isWhite);
   }
@@ -26,7 +25,7 @@ public final class Queen extends SlidingPiece {
   }
 
   @Override
-  public PieceType getType() {
+  public PieceType getType()  {
     return PieceType.QUEEN;
   }
 }

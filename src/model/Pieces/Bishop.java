@@ -7,7 +7,7 @@ import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public final class Bishop extends SlidingPiece {
+public final class Bishop extends AbstractSlidingPiece {
   public Bishop(boolean isWhite) {
     super(isWhite);
   }

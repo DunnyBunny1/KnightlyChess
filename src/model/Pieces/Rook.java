@@ -1,6 +1,5 @@
 package model.Pieces;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import model.Move;
@@ -8,7 +7,7 @@ import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
-public final class Rook extends SlidingPiece {
+public final class Rook extends AbstractSlidingPiece {
   public Rook(boolean isWhite) {
     super(isWhite);
   }

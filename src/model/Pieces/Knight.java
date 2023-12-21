@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import model.Move;
 import model.Piece;
 import model.PieceType;
 import model.ReadOnlyChessModel;
@@ -19,11 +20,11 @@ public final class Knight extends Piece {
   };
 
   @Override
-  public Set<RowColPair> getTargetSquares(RowColPair position, ReadOnlyChessModel model) {
+  public Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
     checkModelAndPositionValidity(position, model);
     //if we are here, we are safe to retrieve the piece and board
     Optional<Piece>[][] board = model.getBoardCopy();
-    Set<RowColPair> targetSquares = new HashSet<>();
+    Set<Move> pseudoLegalMoves = new HashSet<>();
     for (int[] offset : offsets) {
       RowColPair candidatePosition = new RowColPair(
               position.getRow() + offset[0], position.getCol() + offset[1]);
@@ -37,10 +38,11 @@ public final class Knight extends Piece {
         }
         //if we are here, the destination tile contains an enemy piece that we can capture, or
         //the destination tile is unoccupied. In any case, we can move here.
-        targetSquares.add(candidatePosition);
+        //knight moves have no special move flags
+        pseudoLegalMoves.add(new Move(position, candidatePosition, Move.MoveFlag.NONE));
       }
     }
-    return targetSquares;
+    return pseudoLegalMoves;
   }
 
   @Override

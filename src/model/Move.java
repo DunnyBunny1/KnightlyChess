@@ -17,7 +17,8 @@ public final class Move {
     PAWN_PROMOTION_TO_QUEEN,
     DOUBLE_PAWN_PUSH,
     EN_PASSANT,
-    CASTLE,
+    CASTLE_KINGSIDE,
+    CASTLE_QUEENSIDE,
     KING_MOVE,
     ROOK_MOVE,
     NONE;
