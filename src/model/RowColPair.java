@@ -2,6 +2,9 @@ package model;
 
 import java.util.Objects;
 
+/**
+ * Immutable
+ */
 public final class RowColPair {
   private final int row;
   private final int col;

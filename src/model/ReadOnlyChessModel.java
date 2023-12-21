@@ -129,9 +129,10 @@ public interface ReadOnlyChessModel {
    * the King of the given color is on the board.
    *
    * @param c the color to retrieve the king square from
-   * @return
+   * @return the 0-indexed row col pair of the king square.
    * @throws IllegalStateException    if the game has not yet started
    * @throws IllegalArgumentException if the color is not either black or white
+   * @throws IllegalStateException    if the king square is not found
    */
   RowColPair getKingSquare(PlayerColor c);
 
@@ -162,5 +163,20 @@ public interface ReadOnlyChessModel {
    */
   boolean isInBounds(RowColPair pair);
 
+  /**
+   * Returns the castling privileges for the current board state, as a string. K = white kingside,
+   * Q = white queenside, k = black kingside, q = black queenside. If no castling privileges exist,
+   * the string '-' is returned.
+   *
+   * @return an immutable string representing the castling privileges for the current board state.
+   */
   String getCastlingPrivileges();
+
+  /**
+   * Returns the en passant target square, if it exists. Otherwise, returns the empty optional
+   *
+   * @return the en passant target as a 0-indexed row col pair, or the empty optional if it does not
+   * exist.
+   */
+  Optional<RowColPair> getEnPassantTarget();
 }

@@ -3,70 +3,35 @@ package model;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Constructs an immutable move, none of its fields are null (invariant)
+ */
 public final class Move {
   private final RowColPair src;
   private final RowColPair dest;
-
-  private final PieceType pawnPromotionPieceType;
-//  private final MoveFlag flag;
-//  private final RowColPair enPassantCapturedPiece;
-//TODO: Uncomment above ^
+  private final MoveFlag flag;
   public enum MoveFlag {
-    PAWN_PROMOTION,
+    PAWN_PROMOTION_TO_KNIGHT,
+    PAWN_PROMOTION_TO_BISHOP,
+    PAWN_PROMOTION_TO_ROOK,
+    PAWN_PROMOTION_TO_QUEEN,
     DOUBLE_PAWN_PUSH,
     EN_PASSANT,
     CASTLE,
     KING_MOVE,
-    ROOK_MOVE;
+    ROOK_MOVE,
+    NONE;
   }
 
-  public Move(RowColPair src, RowColPair dest) {
+  public Move(RowColPair src, RowColPair dest, MoveFlag flag) {
+    if (src == null || dest == null || flag == null) {
+      throw new IllegalArgumentException("Unable to construct move with null source tile, " +
+              "null destination tile, or null move flag");
+    }
     this.src = src;
     this.dest = dest;
-    this.pawnPromotionPieceType = null;
+    this.flag = flag;
   }
-
-  public Move(RowColPair src, RowColPair dest, PieceType pawnPromotionPieceType) {
-    this.src = src;
-    this.dest = dest;
-    this.pawnPromotionPieceType = pawnPromotionPieceType;
-  }
-
-  public class Builder {
-    private final RowColPair src;
-    private final RowColPair dest;
-
-    private PieceType pawnPromotionPieceType;
-    private MoveFlag flag;
-    private RowColPair enPassantCapturedPiece;
-
-    public Builder(RowColPair src, RowColPair dest) {
-      this.src = src;
-      this.dest = dest;
-    }
-    public Builder setFlag(MoveFlag flag) {
-      if(flag == null){
-        throw new IllegalArgumentException("Unable to construct move with null move flag");
-      }
-      this.flag = flag;
-      return this;
-    }
-
-    public Builder setPawnPromotionPieceType(PieceType type) {
-      if(type == null || !ChessModel.pawnPromotionPieceTypes.contains(type)){
-        throw new IllegalArgumentException("Unable to construct move for null or illegal" +
-                "pawn promotion piece type");
-      }
-      this.pawnPromotionPieceType = pawnPromotionPieceType;
-      return this;
-    }
-
-    public Builder setEnPassantCapturedPiece(){
-      return null ;
-    }
-
-  }
-
   public RowColPair getSourcePosition() {
     return new RowColPair(src.getRow(), src.getCol());
   }
@@ -75,28 +40,13 @@ public final class Move {
     return new RowColPair(dest.getRow(), dest.getCol());
   }
 
-  public Optional<PieceType> getPawnPromotionPieceType() {
-    return Optional.ofNullable(pawnPromotionPieceType);
+  public MoveFlag getFlag() {
+    return this.flag;
   }
-
-//  public Optional<RowColPair> getEnPassantCapturedPiece() {
-//    return Optional.ofNullable(this.enPassantCapturedPiece);
-//  }
-//
-//  public void setFlag(MoveFlag flag) {
-//    this.flag = flag;
-//  }
-//
-//  public Optional<MoveFlag> getFlag() {
-//    return Optional.ofNullable(this.flag);
-//  }
-
 
   @Override
   public String toString() {
-    String pawnPromotionString = pawnPromotionPieceType == null ? "" :
-            "with pawn promotion piece type" + pawnPromotionPieceType.getLowercasedPieceID();
-    return String.format("Move from %s to %s %s", src, dest, pawnPromotionString);
+    return String.format("Move from %s to %s with flag %s", src, dest, flag);
   }
 
   @Override
@@ -105,14 +55,15 @@ public final class Move {
       return true;
     }
     if (other instanceof Move otherMove) {
-      return this.src.equals(otherMove.src) && this.dest.equals(otherMove.dest) && Objects.equals(
-              Optional.ofNullable(pawnPromotionPieceType), otherMove.getPawnPromotionPieceType());
+      return this.src.equals(otherMove.src) &&
+              this.dest.equals(otherMove.dest) &&
+              this.flag == otherMove.flag;
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(src, dest);
+    return Objects.hash(src, dest,flag);
   }
 }

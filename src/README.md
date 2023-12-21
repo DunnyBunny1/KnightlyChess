@@ -15,8 +15,14 @@
       n is the number of moves generated. 
 
 - Move generation
-  - Pseudo-legal move generation 
-  - Make / Unmake moves 
+  - Staged move geneartion 
+    - Pseudo-legal move generation 
+    - Filtering pseudo-legal into legal 
+  - Copy-make generation 
+    - Copy make geneartion is selected over make / unmake 
+      - To see if a pseudo-legal move is legal, the move is made and then 
+      - Reduced complicated code / surface for bugs 
+      - Simple design
 ### The Controller 
 
 ### The View
@@ -47,8 +53,8 @@
     - This ensures that results from partial searches do not go to waste
   
 ### Quiescence Search
-- Keep seraching until we reacha quiet position - one with no captures 
-
+- Keep searching until we reach a quiet position - one with no captures 
+- 
 ### Search extension 
 #### Check Extension
 - If a move puts the enemy player in check, extend the search by a depth of one 

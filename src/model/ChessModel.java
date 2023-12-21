@@ -294,7 +294,7 @@ public final class ChessModel implements MutableChessModel {
     RowColPair destPos = m.getDestinationPosition();
     Piece piece = gameBoard[sourcePos.getRow()][sourcePos.getCol()].get();
     //create the new promotion piece and put it at the destination tile
-    char typeChar = m.getPawnPromotionPieceType().get().getLowercasedPieceID();
+    char typeChar = m.getFlag().getLowercasedPieceID();
     if (piece.getIsWhite()) { //if we are promoting to a white piece, ensure promotion piece is white
       typeChar = Character.toUpperCase(typeChar);
     }
@@ -308,6 +308,7 @@ public final class ChessModel implements MutableChessModel {
     gameBoard[sourcePos.getRow()][sourcePos.getCol()] = Optional.empty();
     return true;
   }
+
   /**
    * If m is an en-passsant move, makes the en-passant move.
    *

@@ -3,6 +3,7 @@ package model.Pieces;
 import java.util.HashSet;
 import java.util.Set;
 
+import model.Move;
 import model.PieceType;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
@@ -13,12 +14,15 @@ public final class Queen extends SlidingPiece {
   }
 
   @Override
-  public Set<RowColPair> getTargetSquares(RowColPair position, ReadOnlyChessModel model) {
-    Set<RowColPair> targetSquares = new HashSet<>();
-    targetSquares.addAll(super.getDirectionalTargetSquares(position, model, DirectionType.HORIZONTAL));
-    targetSquares.addAll(super.getDirectionalTargetSquares(position, model, DirectionType.VERTICAL));
-    targetSquares.addAll(super.getDirectionalTargetSquares(position, model, DirectionType.DIAGONAL));
-    return targetSquares;
+  public Set<Move> getPseudoLegalMoves(RowColPair position, ReadOnlyChessModel model) {
+    //queens can move both horizontally, vertically, and diagonally
+    return super.getSlidingPseudoLegalMoves(
+            position, model, DirectionType.DIAGONAL,DirectionType.VERTICAL,DirectionType.HORIZONTAL);
+  }
+
+  @Override
+  protected Move.MoveFlag getMoveFlag(RowColPair position, RowColPair destination, ReadOnlyChessModel model) {
+    return Move.MoveFlag.NONE; // queens have no specialty move flags
   }
 
   @Override

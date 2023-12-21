@@ -4,11 +4,11 @@ public enum PlayerColor {
   BLACK,
   WHITE;
 
-  public PlayerColor getOpposite(PlayerColor color) {
-    if (color != BLACK && color != WHITE) {
+  public PlayerColor getOpposite() {
+    if (this != BLACK && this != WHITE) {
       throw new IllegalArgumentException(String.format("Unable to generate opposite color for color " +
-              "%s", color));
+              "%s", this));
     }
-    return color == PlayerColor.WHITE ? PlayerColor.BLACK : PlayerColor.WHITE;
+    return this == PlayerColor.WHITE ? PlayerColor.BLACK : PlayerColor.WHITE;
   }
 }

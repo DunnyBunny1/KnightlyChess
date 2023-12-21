@@ -8,10 +8,14 @@ import java.util.Set;
 
 import model.ChessModel;
 import model.Direction;
+import model.Move;
 import model.Piece;
 import model.ReadOnlyChessModel;
 import model.RowColPair;
 
+/**
+ * sliding
+ */
 abstract class SlidingPiece extends Piece {
 
   protected enum DirectionType {
@@ -38,8 +42,25 @@ abstract class SlidingPiece extends Piece {
     super(isWhite);
   }
 
+  protected final Set<Move> getSlidingPseudoLegalMoves(
+          RowColPair position, ReadOnlyChessModel model, DirectionType... directionTypes
+  ) {
+    Set<Move> pseudoLegalMoves = new HashSet<>();
+    for (DirectionType directionType : directionTypes) {
+      Set<RowColPair> directionalPseudoLegalTargetSquares =
+              getDirectionalPseudoLegalTargetSquares(position, model, directionType);
+      for (RowColPair target : directionalPseudoLegalTargetSquares) {
+        Move.MoveFlag flag = getMoveFlag(position, target, model);
+        Move move = new Move(position, target, flag);
+        pseudoLegalMoves.add(move);
+      }
+    }
+    return pseudoLegalMoves;
+  }
 
-  protected final Set<RowColPair> getDirectionalTargetSquares(
+  protected abstract Move.MoveFlag getMoveFlag(RowColPair position, RowColPair destination, ReadOnlyChessModel model);
+
+  private Set<RowColPair> getDirectionalPseudoLegalTargetSquares(
           RowColPair position, ReadOnlyChessModel model, DirectionType directionType) {
     checkModelAndPositionValidity(position, model);
     Set<RowColPair> targetSquares = new HashSet<>();
