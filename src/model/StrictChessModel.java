@@ -51,7 +51,7 @@ public final class StrictChessModel implements MutableChessModel {
     );
   }
 
-  //Private constructor to force client instantiation throught the builder
+  //Private constructor to force client instantiation through the builder
   @SuppressWarnings("unchecked")
   private StrictChessModel(Builder builder) {
     //Set the game board to an empty 8 x 8 array
@@ -577,14 +577,14 @@ public final class StrictChessModel implements MutableChessModel {
   private void checkIfPositionIsValid(RowColPair pair) {
     if (!isInBounds(pair)) {
       throw new IllegalArgumentException("Invalid rank or file - rank or file was not in " +
-              "between 0 and 8 or row col pair was null");
+              "between 0 and 7 or row col pair was null");
     }
   }
 
   @Override
   public boolean isInBounds(RowColPair pair) {
-    return pair != null && pair.getRow() >= 0 && pair.getRow() <= NUM_RANKS
-            && pair.getCol() >= 0 && pair.getCol() <= NUM_FILES;
+    return pair != null && pair.getRow() >= 0 && pair.getRow() < NUM_RANKS
+            && pair.getCol() >= 0 && pair.getCol() < NUM_FILES;
   }
 
   private static Optional<Piece> fenCharToPieceFactory(char fenChar) {

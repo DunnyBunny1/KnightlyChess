@@ -143,7 +143,7 @@ public final class Pawn extends Piece {
     RowColPair leftDiagonal = new RowColPair(position.getRow() + rankOffset, position.getCol() + leftFileOffset);
     if (isOccupiedByEnemyPiece(model, leftDiagonal)) {
       for (Move.MoveFlag flag : promotionFlags) { //Add one move for each promotion type
-        pseudoLegalMoves.add(new Move(position, rightDiagonal, flag));
+        pseudoLegalMoves.add(new Move(position, leftDiagonal, flag));
       }
     }
     //Add all the single forward non-capture promotions to the set of pseudo-legal moves
